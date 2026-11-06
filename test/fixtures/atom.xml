@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Test Atom</title>
+<entry><title>Solitaire Tower review</title><link rel="alternate" href="https://example.com/solitaire-tower-review?utm_source=rss"/><published>2026-11-01T10:00:00Z</published><summary type="html">&lt;p&gt;A &lt;b&gt;great&lt;/b&gt; game&lt;/p&gt;</summary><author><name>Jane</name></author></entry>
+</feed>

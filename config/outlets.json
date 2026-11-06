@@ -1,0 +1,31 @@
+{
+  "_comment": "Curated outlets. tier: A (national / top gaming), B (solid niche or regional), C (small blogs). 'feed' entries are polled every run and pre-filtered by project keywords before the LLM sees them. Domains without a feed still get their tier applied to Google News / manual hits. Run `npm run check-feeds` to validate URLs.",
+  "outlets": [
+    { "name": "Pèse sur Start", "domain": "pesesurstart.com", "feed": "https://pesesurstart.com/feed/", "lang": "fr", "region": "QC", "tier": "B" },
+    { "name": "La Presse", "domain": "lapresse.ca", "feed": "", "lang": "fr", "region": "QC", "tier": "A" },
+    { "name": "Le Devoir", "domain": "ledevoir.com", "feed": "", "lang": "fr", "region": "QC", "tier": "A" },
+    { "name": "Radio-Canada", "domain": "ici.radio-canada.ca", "feed": "", "lang": "fr", "region": "QC", "tier": "A" },
+    { "name": "Le Journal de Montréal", "domain": "journaldemontreal.com", "feed": "", "lang": "fr", "region": "QC", "tier": "A" },
+    { "name": "Le Soleil", "domain": "lesoleil.com", "feed": "", "lang": "fr", "region": "QC", "tier": "B" },
+    { "name": "Urbania", "domain": "urbania.ca", "feed": "https://urbania.ca/feed", "lang": "fr", "region": "QC", "tier": "B" },
+    { "name": "Numerama", "domain": "numerama.com", "feed": "https://www.numerama.com/feed/", "lang": "fr", "region": "FR", "tier": "A" },
+    { "name": "Jeuxvideo.com", "domain": "jeuxvideo.com", "feed": "https://www.jeuxvideo.com/rss/rss.xml", "lang": "fr", "region": "FR", "tier": "A" },
+    { "name": "Gamekult", "domain": "gamekult.com", "feed": "https://www.gamekult.com/feed.xml", "lang": "fr", "region": "FR", "tier": "A" },
+    { "name": "Gameblog", "domain": "gameblog.fr", "feed": "https://www.gameblog.fr/rss.php", "lang": "fr", "region": "FR", "tier": "B" },
+    { "name": "JV (jvfrance)", "domain": "jvfrance.com", "feed": "https://www.jvfrance.com/feed/", "lang": "fr", "region": "FR", "tier": "B" },
+    { "name": "IGN", "domain": "ign.com", "feed": "https://feeds.feedburner.com/ign/all", "lang": "en", "region": "INT", "tier": "A" },
+    { "name": "Polygon", "domain": "polygon.com", "feed": "https://www.polygon.com/rss/index.xml", "lang": "en", "region": "INT", "tier": "A" },
+    { "name": "Kotaku", "domain": "kotaku.com", "feed": "https://kotaku.com/rss", "lang": "en", "region": "INT", "tier": "A" },
+    { "name": "PC Gamer", "domain": "pcgamer.com", "feed": "https://www.pcgamer.com/rss/", "lang": "en", "region": "INT", "tier": "A" },
+    { "name": "Rock Paper Shotgun", "domain": "rockpapershotgun.com", "feed": "https://www.rockpapershotgun.com/feed", "lang": "en", "region": "INT", "tier": "A" },
+    { "name": "Eurogamer", "domain": "eurogamer.net", "feed": "https://www.eurogamer.net/feed", "lang": "en", "region": "INT", "tier": "A" },
+    { "name": "GamesIndustry.biz", "domain": "gamesindustry.biz", "feed": "https://www.gamesindustry.biz/feed", "lang": "en", "region": "INT", "tier": "A" },
+    { "name": "Pocket Gamer", "domain": "pocketgamer.com", "feed": "https://www.pocketgamer.com/news/index.rss", "lang": "en", "region": "INT", "tier": "B" },
+    { "name": "TouchArcade", "domain": "toucharcade.com", "feed": "https://toucharcade.com/feed/", "lang": "en", "region": "INT", "tier": "B" },
+    { "name": "Siliconera", "domain": "siliconera.com", "feed": "https://www.siliconera.com/feed/", "lang": "en", "region": "INT", "tier": "B" },
+    { "name": "Destructoid", "domain": "destructoid.com", "feed": "https://www.destructoid.com/feed/", "lang": "en", "region": "INT", "tier": "B" },
+    { "name": "Game Developer", "domain": "gamedeveloper.com", "feed": "https://www.gamedeveloper.com/rss.xml", "lang": "en", "region": "INT", "tier": "B" },
+    { "name": "CBC", "domain": "cbc.ca", "feed": "", "lang": "en", "region": "CA", "tier": "A" },
+    { "name": "Montreal Gazette", "domain": "montrealgazette.com", "feed": "", "lang": "en", "region": "QC", "tier": "A" }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "_comment": "One entry per client/game. Secrets (webhook URLs, API keys) are NEVER stored here: reference environment variable names instead.",
+  "projects": [
+    {
+      "id": "solitaire-tower",
+      "name": "Solitaire Tower",
+      "client": "Example Studio",
+      "active": true,
+      "keywords": ["\"Solitaire Tower\""],
+      "required_terms": ["solitaire tower"],
+      "exclude_terms": ["tripeaks tower", "tower defense solitaire"],
+      "context": "A cozy mobile solitaire roguelite by Example Studio (Montréal). Released on iOS and Android. Not to be confused with generic 'tower solitaire' card game variants or app-store clones.",
+      "languages": ["fr", "en"],
+      "sources": {
+        "rss": true,
+        "google_news": true,
+        "youtube": { "enabled": true, "queries": ["\"Solitaire Tower\" game"], "every_hours": 6 },
+        "twitch": { "enabled": true, "game_id": "", "game_name": "Solitaire Tower", "min_viewers": 0 },
+        "reddit": { "enabled": true, "queries": ["\"Solitaire Tower\""] },
+        "bluesky": { "enabled": true, "queries": ["\"Solitaire Tower\""] }
+      },
+      "alerts": {
+        "discord_webhook_env": "DISCORD_WEBHOOK_SOLITAIRE_TOWER",
+        "slack_webhook_env": "",
+        "min_tier": "",
+        "notify_streams": true
+      },
+      "branding": {
+        "primary_color": "#5b3fd1",
+        "accent_color": "#f2b705",
+        "logo_url": "",
+        "agency": "MJR Comms",
+        "agency_logo_url": "",
+        "default_report_language": "fr"
+      }
+    }
+  ]
+}

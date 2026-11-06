@@ -1,0 +1,26 @@
+{
+  "name": "gamepresscoverage",
+  "version": "0.1.0",
+  "description": "Game press & creator coverage tracker: RSS, Google News, YouTube, Twitch, Reddit, Bluesky + Claude relevance filtering, alerts, dashboard and bilingual reports.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "poll": "node --disable-warning=ExperimentalWarning src/cli.js poll",
+    "poll:force": "node --disable-warning=ExperimentalWarning src/cli.js poll --force",
+    "serve": "node --disable-warning=ExperimentalWarning src/server.js",
+    "report": "node --disable-warning=ExperimentalWarning src/cli.js report",
+    "export": "node --disable-warning=ExperimentalWarning src/cli.js export",
+    "demo": "node --disable-warning=ExperimentalWarning src/cli.js demo --db data/demo.db",
+    "check-feeds": "node --disable-warning=ExperimentalWarning src/cli.js check-feeds",
+    "test": "node --test --disable-warning=ExperimentalWarning test/*.test.js",
+    "serve:demo": "node --disable-warning=ExperimentalWarning src/server.js --db data/demo.db",
+    "report:demo": "node --disable-warning=ExperimentalWarning src/cli.js report --db data/demo.db --project solitaire-tower"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
+    "fast-xml-parser": "^4.5.0"
+  }
+}
