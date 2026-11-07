@@ -1,33 +1,33 @@
-// Static, read-only export of the dashboard (for GitHub Pages / Cloudflare Pages / any static host).
+// Builds data.json: the collected coverage the dashboard reads (published on the coverage-data branch).
 import fs from "node:fs";
 import path from "node:path";
-import { loadProjects } from "./lib/config.js";
-import { buildReport } from "./report.js";
 import { queryHits, queryStreams, pollStates } from "./lib/db.js";
-import { hasClaude, MODEL, TYPES, SENTIMENTS } from "./lib/classify.js";
+import { hasClaude, MODEL } from "./lib/classify.js";
 
-export function exportStatic(outDir = "site") {
-  fs.mkdirSync(path.join(outDir, "reports"), { recursive: true });
-  for (const f of fs.readdirSync("web")) fs.copyFileSync(path.join("web", f), path.join(outDir, f));
-  const from = new Date(Date.now() - 365 * 86400_000).toISOString();
-  const projects = loadProjects({ includeInactive: true });
-  const data = {
+export function buildData() {
+  const yearAgo = new Date(Date.now() - 400 * 86400_000).toISOString();
+  const reviewWindow = Date.now() - 120 * 86400_000;
+  const hits = queryHits({ from: yearAgo, includeIrrelevant: true, limit: 20000 })
+    // keep confirmed coverage, plus recent AI rejections for the "To review" tab (not the free keyword pre-filter rejects)
+    .filter((h) => h.relevant === 1 || (h.relevant === 0 && h.classified_by !== "prefilter" && Date.parse(h.discovered_at) >= reviewWindow))
+    .map(({ raw, snippet, ...h }) => {
+      if (h.source === "manual") {
+        try { h.manual_id = JSON.parse(raw || "{}").manual_id ?? null; } catch { h.manual_id = null; }
+      }
+      return h;
+    });
+  return {
     generated_at: new Date().toISOString(),
-    mode: "static",
-    projects: projects.map(({ id, name, client, branding, active }) => ({ id, name, client, branding, active })),
-    // Only confirmed coverage is published; the review queue stays private.
-    hits: queryHits({ from }).map(({ raw, relevance_reason, ...h }) => h),
-    streams: queryStreams({ from }),
+    classifier: hasClaude() ? MODEL : "keyword heuristic (no Claude key)",
+    hits,
+    streams: queryStreams({ from: yearAgo }),
     poll_state: pollStates(),
-    classifier: hasClaude() ? MODEL : "heuristic",
-    enums: { types: TYPES, sentiments: SENTIMENTS, media: ["web", "video", "stream", "social", "print", "broadcast", "podcast"] },
   };
-  fs.writeFileSync(path.join(outDir, "data.json"), JSON.stringify(data));
-  const today = new Date();
-  const iso = (d) => d.toISOString().slice(0, 10);
-  for (const p of projects) {
-    const html = buildReport(p, { from: iso(new Date(today - 30 * 86400_000)), to: iso(today) });
-    fs.writeFileSync(path.join(outDir, "reports", `${p.id}-last-30-days.html`), html);
-  }
-  console.log(`Static dashboard exported to ${outDir}/ (${data.hits.length} hits, ${data.streams.length} streams)`);
+}
+
+export function exportData(out = "data/data.json") {
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  const data = buildData();
+  fs.writeFileSync(out, JSON.stringify(data));
+  console.log(`Wrote ${out} (${data.hits.length} hits, ${data.streams.length} streams)`);
 }

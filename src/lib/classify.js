@@ -2,9 +2,14 @@
 // plus language, coverage type, sentiment and a one-line summary in EN and FR.
 // Without ANTHROPIC_API_KEY a keyword heuristic is used instead.
 import Anthropic from "@anthropic-ai/sdk";
+import fs from "node:fs";
 import { guessLanguage, matchesTerms } from "./util.js";
 
-export const MODEL = process.env.COVERAGE_MODEL || "claude-opus-5-5";
+function settings() {
+  try { return JSON.parse(fs.readFileSync("config/settings.json", "utf8")); } catch { return {}; }
+}
+// Model chosen in the dashboard (config/settings.json); env var overrides it.
+export const MODEL = process.env.COVERAGE_MODEL || settings().classifier_model || "claude-opus-5-5";
 const EFFORT = process.env.COVERAGE_EFFORT || "low";
 
 export const TYPES = ["review", "preview", "news", "feature", "interview", "guide", "listicle", "video", "stream", "social", "other"];

@@ -12,3 +12,16 @@ export function loadEnv(file = ".env") {
   }
 }
 loadEnv();
+
+// In GitHub Actions the workflow passes every repository secret as one JSON blob, so keys added
+// from the dashboard (including per-game webhooks) work without editing the workflow file.
+if (process.env.ALL_SECRETS) {
+  try {
+    for (const [k, v] of Object.entries(JSON.parse(process.env.ALL_SECRETS))) {
+      if (k !== "github_token" && typeof v === "string" && v && !process.env[k]) process.env[k] = v;
+    }
+  } catch {
+    /* ignore malformed */
+  }
+  delete process.env.ALL_SECRETS;
+}

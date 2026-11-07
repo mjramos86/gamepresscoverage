@@ -2,6 +2,7 @@ name: Test
 on:
   push:
     branches-ignore: [coverage-data]
+    paths-ignore: ["config/**"]
   pull_request:
 jobs:
   test:

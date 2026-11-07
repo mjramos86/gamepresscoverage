@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pollAll } from "./poll.js";
 import { buildReport } from "./report.js";
-import { exportStatic } from "./export.js";
+import { exportData } from "./export.js";
 import { seedDemo } from "./demo.js";
 import { loadOutlets, getProject } from "./lib/config.js";
 import { fetchFeed } from "./collectors/rss.js";
@@ -45,7 +45,7 @@ try {
       break;
     }
     case "export":
-      exportStatic(a.out || "site");
+      exportData(a.out || "data/data.json");
       break;
     case "demo":
       seedDemo();
@@ -62,7 +62,7 @@ try {
       break;
     }
     default:
-      console.log("Commands: poll [--force] [--project id] [--no-alerts] | report --project id [--from] [--to] [--lang] | export [--out dir] | demo | check-feeds");
+      console.log("Commands: poll [--force] [--project id] [--no-alerts] | report --project id [--from] [--to] [--lang] | export [--out file] | demo | check-feeds");
       process.exitCode = cmd ? 1 : 0;
   }
 } catch (err) {

@@ -1,7 +1,8 @@
 // One polling pass: collect -> store -> dedupe -> classify -> alert.
-import { loadProjects } from "./lib/config.js";
+import { loadProjects, getProject } from "./lib/config.js";
+import { applyEdits } from "./lib/edits.js";
 import { openDb, insertHit, updateHit, getHit, shouldRun, markRun } from "./lib/db.js";
-import { classify, mapLimit, hasClaude, MODEL } from "./lib/classify.js";
+import { classify, classifyWithClaude, mapLimit, hasClaude, MODEL } from "./lib/classify.js";
 import { dedupeNewHits } from "./lib/dedupe.js";
 import { alertHits, alertStreams } from "./lib/alerts.js";
 import { collectOutletFeeds } from "./collectors/rss.js";
@@ -87,6 +88,22 @@ export async function pollAll({ force = false, only = null, alert = true } = {})
   openDb();
   const projects = loadProjects().filter((p) => !only || p.id === only);
   log.info(`Polling ${projects.length} project(s) — classifier: ${hasClaude() ? MODEL : "heuristic (no ANTHROPIC_API_KEY)"}`);
+
+  // 1. Apply corrections and manual entries made in the dashboard; let Claude summarise manual entries.
+  const needSummary = applyEdits(log);
+  if (needSummary.length && hasClaude()) {
+    await mapLimit(needSummary, 3, async (id) => {
+      const hit = getHit(id);
+      const project = getProject(hit.project_id);
+      if (!project) return;
+      try {
+        const r = await classifyWithClaude(project, hit);
+        updateHit(id, { summary_en: hit.summary_en || r.summary_en, summary_fr: hit.summary_fr || r.summary_fr, sentiment: hit.sentiment || r.sentiment });
+      } catch (err) {
+        log.warn(`  manual entry #${id}: summary failed (${err.message})`);
+      }
+    });
+  }
 
   const candidates = new Map(projects.map((p) => [p.id, []]));
   const add = (pid, items) => items && candidates.get(pid).push(...items);

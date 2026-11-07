@@ -1,0 +1,5 @@
+{
+  "_comment": "Written by the dashboard. 'overrides' are your corrections to automatically found coverage (key: project|canonical URL). 'manual' are entries you logged by hand (TikTok, Instagram, print, radio/TV...).",
+  "overrides": {},
+  "manual": []
+}

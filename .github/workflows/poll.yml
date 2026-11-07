@@ -1,19 +1,22 @@
 name: Poll coverage
 
+# Runs every 30 minutes, whenever settings are changed from the dashboard (config/ on main),
+# and when "Check for new coverage" is clicked. Each source keeps its own minimum interval.
 on:
   schedule:
-    - cron: "*/30 * * * *"   # every 30 min; each source has its own minimum interval (see src/poll.js)
+    - cron: "*/30 * * * *"
+  push:
+    branches: [main]
+    paths: ["config/**"]
   workflow_dispatch:
     inputs:
       force:
-        description: "Ignore per-source intervals"
+        description: "Ignore per-source intervals and check everything now"
         type: boolean
         default: false
 
 permissions:
-  contents: write   # to push the SQLite DB to the coverage-data branch
-  pages: write
-  id-token: write
+  contents: write   # to save the database + data.json on the coverage-data branch
 
 concurrency:
   group: poll-coverage
@@ -25,23 +28,13 @@ jobs:
     timeout-minutes: 20
     env:
       DB_PATH: data/coverage.db
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      COVERAGE_MODEL: ${{ vars.COVERAGE_MODEL }}
-      YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-      TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
-      TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
-      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-      REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT }}
-      BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
-      BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
-      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      # Per-project webhooks: add one line per env name referenced in config/projects.json
-      DISCORD_WEBHOOK_SOLITAIRE_TOWER: ${{ secrets.DISCORD_WEBHOOK_SOLITAIRE_TOWER }}
+      # Every repository secret (API keys, webhooks) is made available to the app;
+      # keys added from the dashboard work without editing this file.
+      ALL_SECRETS: ${{ toJSON(secrets) }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main          # always use the latest settings, whatever the default branch is
           fetch-depth: 1
 
       - uses: actions/setup-node@v4
@@ -51,54 +44,26 @@ jobs:
 
       - run: npm ci
 
-      - name: Restore database from coverage-data branch
+      - name: Restore database
         run: |
           mkdir -p data
           if git fetch --depth=1 origin coverage-data 2>/dev/null; then
-            git show FETCH_HEAD:coverage.db > data/coverage.db
-            echo "Restored $(du -h data/coverage.db | cut -f1) database"
-          else
-            echo "No coverage-data branch yet; starting a fresh database"
+            git show FETCH_HEAD:coverage.db > data/coverage.db 2>/dev/null || rm -f data/coverage.db
           fi
 
-      - name: Poll sources
+      - name: Check sources
         run: npm run poll -- ${{ inputs.force && '--force' || '' }}
 
-      - name: Build static dashboard + reports
+      - name: Build data for the dashboard
         run: npm run export
 
-      - name: Save database (single-commit orphan branch, no history bloat)
+      - name: Save (single-commit coverage-data branch, no history bloat)
         run: |
-          cp data/coverage.db "$RUNNER_TEMP/coverage.db"
+          cp data/coverage.db data/data.json "$RUNNER_TEMP/"
           git config user.name "coverage-bot"
           git config user.email "coverage-bot@users.noreply.github.com"
           git switch --orphan coverage-data-tmp
-          cp "$RUNNER_TEMP/coverage.db" coverage.db
-          git add -f coverage.db
-          git commit -q -m "Coverage DB snapshot $(date -u +%FT%TZ)"
+          cp "$RUNNER_TEMP/coverage.db" "$RUNNER_TEMP/data.json" .
+          git add -f coverage.db data.json
+          git commit -q -m "Coverage snapshot $(date -u +%FT%TZ)"
           git push -q -f origin HEAD:coverage-data
-
-      - name: Upload dashboard snapshot (private artifact)
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-dashboard
-          path: site
-          retention-days: 7
-
-      # Publishing to GitHub Pages makes the dashboard PUBLIC (even for private repos on most plans).
-      # Opt in by setting the repository variable PUBLISH_DASHBOARD=true.
-      - uses: actions/upload-pages-artifact@v3
-        if: vars.PUBLISH_DASHBOARD == 'true'
-        with:
-          path: site
-
-  deploy-pages:
-    needs: poll
-    if: vars.PUBLISH_DASHBOARD == 'true'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
